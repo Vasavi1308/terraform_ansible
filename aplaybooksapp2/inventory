@@ -1,2 +1,5 @@
 db_server
 web_server
+
+[defaults]
+    host_key_checking = false
