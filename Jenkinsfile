@@ -1,35 +1,39 @@
-pipeline { 
-    environment { 
-        registry = "vasavidockerimage/python-flask-app" 
-        registryCredential = 'docker_credentials' 
-        dockerImage = '' 
-    }
-    agent any 
-    stages { 
-        stage('Cloning our ansible and terraform from Git') { 
-            steps { 
-                git branch:'master', url: 'https://github.com/Vasavi1308/terraform_ansible.git' 
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone the Repo') {
+            steps {
+                echo 'Cloning the Code from Git'
+                git branch:'main', url: 'https://github.com/nishanthkumarpathi/my-lab-infra.git'
             }
         }
-        stage('Build the infrastructure first') {
+        stage('Provision the Terraform Infra') {
             steps {
-                sh '''cd terraformInfra
-                        pwd
-                        terraform init
-                        pwd
-                        terraform apply -auto-approve'''
+                echo 'Init the Terraform to Download and Apply Terraform with -auto-approve option'
+                sh '''
+                cd terraforminfra
+                terraform init
+                terraform validate
+                terraform fmt
+                echo "its time to apply the code"
+                terraform apply -auto-approve
+                '''
             }
-        } 
-        stage('check if the infra is created') {
+        }
+        stage('Ansible to Configure DB and Web Server') {
             steps {
-                sh "pwd"
-                sh "ansible-playbook aplaybooksapp2/ping-playbook.yml -i aplaybooksapp2/inventory"
+                sh '''
+                echo "Running Ansible Command"
+                cd ansibleinfracm
+                ansible-playbook playbook.yml -i inventory
+                '''
             }
-        } 
-        stage('configure the created infrastructure') {
+        }
+        stage('Dummy2') {
             steps {
-                sh "ansible-playbook aplaybooksapp2/playbook.yml -i aplaybooksapp2/inventory"
+                echo 'Hello World'
             }
-        } 
+        }
     }
 }
